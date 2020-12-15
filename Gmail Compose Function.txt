@@ -1,0 +1,66 @@
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.Assert;
+
+public class SendMailWithAttachment{
+    public static void main(String[] args) throws IOException, InterruptedException {
+        Scanner kb = new Scanner(System.in);
+        System.out.println("enter the path for gecko driver");
+        String pathForDriver = kb.nextLine();
+        System.out.println("enter ur id: ");
+        String id = kb.nextLine();
+        System.out.println("enter ur pass: ");
+        String password = kb.nextLine();
+        System.out.println("enter email-id to whom u want to send the mail: ");
+        String toId = kb.nextLine();
+        System.out.println("enter subject for mail: ");
+        String subject = kb.nextLine();
+        System.out.println("enter the content of the mail: ");
+        String content = kb.nextLine();
+        System.out.println("enter the path of file to add");
+        String path = kb.nextLine();
+       
+        //open gmail
+        System. setProperty("webdriver.gecko.driver", pathForDriver);
+        WebDriver driver = new FirefoxDriver();
+        driver.manage().timeouts().implicitlyWait(50, TimeUnit.SECONDS);
+        driver.get("https://accounts.google.com/AccountChooser/identifier?service=mail&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&flowName=GlifWebSignIn&flowEntry=AddSession");
+       
+        //login to gmail
+        driver.findElement(By.id("identifierId")).sendKeys(id);
+        driver.findElement(By.xpath("//span[text()='Next']//parent::button")).click();
+       
+        driver.findElement(By.xpath("//input[@name='password']")).sendKeys(password);
+        driver.findElement(By.xpath("//input[@type='checkbox']")).click();
+        driver.findElement(By.xpath("//span[text()='Next']//parent::button")).click();
+       
+        //click on compose and add the to mail id, and subject
+        driver.findElement(By.xpath("//*[text()='Compose']")).click();
+        driver.findElement(By.id(":qf")).sendKeys(toId);
+        driver.findElement(By.xpath("//input[@name='subjectbox']")).sendKeys(subject);
+       
+        //Write the mail body
+       
+        driver.findElement(By.id(":r1")).sendKeys(content);
+       
+       
+        //click on attachment
+        driver.findElement(By.xpath("//div[@class='a1 aaA aMZ']")).click();
+        //use autoit tool to attach a file
+        Runtime.getRuntime().exec(path);
+        Thread.sleep(10000); //wait for 10sec to upload file
+       
+        //click on send
+        driver.findElement(By.xpath("//*[text()='Send']")).click();
+        String msg = driver.findElement(By.xpath("//div[contains(text(),'Your message has been sent.')]")).getText();
+        String exp = "Your message has been sent. View message";
+        Assert.assertEquals(msg, exp);
+        System.out.println("pass");
+        driver.close();
+    }
+}
